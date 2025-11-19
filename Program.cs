@@ -1,6 +1,7 @@
-
 using BeautySalon.API.Data;
 using Microsoft.EntityFrameworkCore;
+using BeautySalon.API.Repositories;
+using BeautySalon.API.Repositories.Interfaces;
 
 
 namespace BeautySalon.API
@@ -9,6 +10,7 @@ namespace BeautySalon.API
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.

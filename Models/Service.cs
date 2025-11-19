@@ -18,6 +18,7 @@ namespace BeautySalon.API.Models
 
         [Required]
         public int DurationMinutes { get; set; }
+
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
         public ICollection<EmployeeService> EmployeeServices { get; set; } = new List<EmployeeService>();
     }
