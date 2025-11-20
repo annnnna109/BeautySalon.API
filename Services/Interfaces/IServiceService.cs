@@ -26,5 +26,20 @@ namespace BeautySalon.API.Services.Interfaces
         /// Получить услуги с сотрудниками
         /// </summary>
         Task<IEnumerable<ServiceDTO>> GetServicesWithEmployeesAsync();
+        /// <summary>
+        /// Создать новую услугу
+        /// </summary>
+        Task<ServiceDTO> CreateServiceAsync(CreateServiceDTO createServiceDto);
+
+        /// <summary>
+        /// Обновить услугу
+        /// </summary>
+        Task UpdateServiceAsync(int id, UpdateServiceDTO updateServiceDto);
+
+        /// <summary>
+        /// Удалить услугу
+        /// </summary>
+        Task DeleteServiceAsync(int id);
+
     }
 }

@@ -1,77 +1,94 @@
-﻿using BeautySalon.API.Models;
-using BeautySalon.API.Repositories.Interfaces;
+﻿using BeautySalon.API.DTOs;
+using BeautySalon.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BeautySalon.API.Controllers
 {
+    /// <summary>
+    /// Контроллер для работы с клиентами
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ClientsController : ControllerBase
     {
-        private readonly IClientRepository _clientRepository;
+        private readonly IClientService _clientService;
 
-        public ClientsController(IClientRepository clientRepository)
+        /// <summary>
+        /// Конструктор контроллера клиентов
+        /// </summary>
+        public ClientsController(IClientService clientService)
         {
-            _clientRepository = clientRepository;
+            _clientService = clientService;
         }
 
-        // GET: api/Clients
+        /// <summary>
+        /// Получить всех клиентов
+        /// </summary>
+        /// <returns>Список клиентов</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Client>>> GetClients()
+        public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClients()
         {
-            var clients = await _clientRepository.GetAllAsync();
+            var clients = await _clientService.GetAllClientsAsync();
             return Ok(clients);
         }
 
-        // GET: api/Clients/5
+        /// <summary>
+        /// Получить клиента по ID
+        /// </summary>
+        /// <param name="id">ID клиента</param>
+        /// <returns>Данные клиента</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Client>> GetClient(int id)
+        public async Task<ActionResult<ClientDTO>> GetClient(int id)
         {
-            var client = await _clientRepository.GetByIdAsync(id);
-
-            if (client == null)
-            {
-                return NotFound();
-            }
-
-            return client;
+            var client = await _clientService.GetClientByIdAsync(id);
+            return Ok(client);
         }
 
-        // PUT: api/Clients/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutClient(int id, Client client)
+        /// <summary>
+        /// Создать нового клиента
+        /// </summary>
+        /// <param name="createClientDto">Данные для создания клиента</param>
+        /// <returns>Созданный клиент</returns>
+        [HttpPost]
+        public async Task<ActionResult<ClientDTO>> PostClient(CreateClientDTO createClientDto)
         {
-            if (id != client.Id)
-            {
-                return BadRequest();
-            }
+            var client = await _clientService.CreateClientAsync(createClientDto);
+            return CreatedAtAction(nameof(GetClient), new { id = client.Id }, client);
+        }
 
-            _clientRepository.Update(client);
-
+        /// <summary>
+        /// Обновить данные клиента
+        /// </summary>
+        /// <param name="id">ID клиента</param>
+        /// <param name="updateClientDto">Обновленные данные клиента</param>
+        /// <returns>Результат операции</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutClient(int id, UpdateClientDTO updateClientDto)
+        {
+            await _clientService.UpdateClientAsync(id, updateClientDto);
             return NoContent();
         }
 
-        // POST: api/Clients
-        [HttpPost]
-        public async Task<ActionResult<Client>> PostClient(Client client)
-        {
-            await _clientRepository.AddAsync(client);
-            return CreatedAtAction("GetClient", new { id = client.Id }, client);
-        }
-
-        // DELETE: api/Clients/5
+        /// <summary>
+        /// Удалить клиента
+        /// </summary>
+        /// <param name="id">ID клиента</param>
+        /// <returns>Результат операции</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(int id)
         {
-            await _clientRepository.RemoveByIdAsync(id);
+            await _clientService.DeleteClientAsync(id);
             return NoContent();
         }
 
-        // GET: api/Clients/with-appointments
+        /// <summary>
+        /// Получить клиентов с их записями
+        /// </summary>
+        /// <returns>Список клиентов с записями</returns>
         [HttpGet("with-appointments")]
-        public async Task<ActionResult<IEnumerable<Client>>> GetClientsWithAppointments()
+        public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClientsWithAppointments()
         {
-            var clients = await _clientRepository.GetClientsWithAppointmentsAsync();
+            var clients = await _clientService.GetClientsWithAppointmentsAsync();
             return Ok(clients);
         }
     }

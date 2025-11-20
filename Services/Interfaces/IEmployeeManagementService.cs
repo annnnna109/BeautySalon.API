@@ -5,7 +5,7 @@ namespace BeautySalon.API.Services.Interfaces
     /// <summary>
     /// Интерфейс сервиса для работы с сотрудниками
     /// </summary>
-    public interface IEmployeeService
+    public interface IEmployeeManagementService
     {
         /// <summary>
         /// Получить всех сотрудников

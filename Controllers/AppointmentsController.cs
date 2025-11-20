@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BeautySalon.API.Controllers
 {
+    /// <summary>
+    /// Контроллер для работы с записями на прием
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class AppointmentsController : ControllerBase
@@ -21,6 +24,7 @@ namespace BeautySalon.API.Controllers
         /// <summary>
         /// Получить все записи
         /// </summary>
+        /// <returns>Список записей</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointments()
         {
@@ -31,6 +35,8 @@ namespace BeautySalon.API.Controllers
         /// <summary>
         /// Получить запись по ID
         /// </summary>
+        /// <param name="id">ID записи</param>
+        /// <returns>Данные записи</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<AppointmentDTO>> GetAppointment(int id)
         {
@@ -41,6 +47,8 @@ namespace BeautySalon.API.Controllers
         /// <summary>
         /// Создать новую запись
         /// </summary>
+        /// <param name="createAppointmentDto">Данные для создания записи</param>
+        /// <returns>Созданная запись</returns>
         [HttpPost]
         public async Task<ActionResult<AppointmentDTO>> PostAppointment(CreateAppointmentDTO createAppointmentDto)
         {
@@ -51,6 +59,9 @@ namespace BeautySalon.API.Controllers
         /// <summary>
         /// Обновить запись
         /// </summary>
+        /// <param name="id">ID записи</param>
+        /// <param name="updateAppointmentDto">Обновленные данные записи</param>
+        /// <returns>Результат операции</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAppointment(int id, CreateAppointmentDTO updateAppointmentDto)
         {
@@ -61,6 +72,8 @@ namespace BeautySalon.API.Controllers
         /// <summary>
         /// Удалить запись
         /// </summary>
+        /// <param name="id">ID записи</param>
+        /// <returns>Результат операции</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
@@ -71,6 +84,8 @@ namespace BeautySalon.API.Controllers
         /// <summary>
         /// Получить записи по дате
         /// </summary>
+        /// <param name="date">Дата для фильтрации</param>
+        /// <returns>Список записей на указанную дату</returns>
         [HttpGet("date/{date}")]
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentsByDate(DateTime date)
         {
@@ -81,6 +96,8 @@ namespace BeautySalon.API.Controllers
         /// <summary>
         /// Получить записи клиента
         /// </summary>
+        /// <param name="clientId">ID клиента</param>
+        /// <returns>Список записей клиента</returns>
         [HttpGet("client/{clientId}")]
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentsByClient(int clientId)
         {

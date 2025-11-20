@@ -37,5 +37,8 @@ namespace BeautySalon.API.Services.Interfaces
         /// Получить клиентов с записями
         /// </summary>
         Task<IEnumerable<ClientDTO>> GetClientsWithAppointmentsAsync();
+        /// <summary>
+        /// Создать нового клиента
+        /// </summary>
     }
 }

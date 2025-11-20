@@ -8,7 +8,7 @@ namespace BeautySalon.API.Services
     /// <summary>
     /// Сервис для работы с сотрудниками
     /// </summary>
-    public class EmployeeService : IEmployeeService
+    public class EmployeeManagementService : IEmployeeManagementService
     {
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IMapper _mapper;
@@ -16,7 +16,7 @@ namespace BeautySalon.API.Services
         /// <summary>
         /// Конструктор сервиса сотрудников
         /// </summary>
-        public EmployeeService(IEmployeeRepository employeeRepository, IMapper mapper)
+        public EmployeeManagementService(IEmployeeRepository employeeRepository, IMapper mapper)
         {
             _employeeRepository = employeeRepository;
             _mapper = mapper;

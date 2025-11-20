@@ -65,7 +65,7 @@ namespace BeautySalon.API
 
             // Service Registration
             builder.Services.AddScoped<IClientService, ClientService>();
-            builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+            builder.Services.AddScoped<IEmployeeManagementService, EmployeeManagementService>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 

@@ -19,6 +19,7 @@ namespace BeautySalon.API.Mapping
             // Service mappings
             CreateMap<Service, ServiceDTO>();
             CreateMap<CreateServiceDTO, Service>();
+            CreateMap<UpdateServiceDTO, Service>();
 
             // Employee mappings
             CreateMap<Employee, EmployeeDTO>();
