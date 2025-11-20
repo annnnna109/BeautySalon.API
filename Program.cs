@@ -1,7 +1,13 @@
 using BeautySalon.API.Data;
-using Microsoft.EntityFrameworkCore;
+using BeautySalon.API.Middleware;
+using BeautySalon.API.Models;
 using BeautySalon.API.Repositories;
 using BeautySalon.API.Repositories.Interfaces;
+using BeautySalon.API.Services;
+using BeautySalon.API.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 
 
 namespace BeautySalon.API
@@ -23,6 +29,8 @@ namespace BeautySalon.API
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
+            // Global Exception Handling Middleware
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             // Seed the database
             using (var scope = app.Services.CreateScope())
@@ -44,6 +52,26 @@ namespace BeautySalon.API
                     logger.LogError(ex, "An error occurred seeding the DB.");
                 }
             }
+
+            ////// AutoMapper
+            ////builder.Services.AddAutoMapper(typeof(Program));
+
+            // Repository Registration
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
+            builder.Services.AddScoped<IClientRepository, ClientRepository>();
+            builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+            builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+
+            // Service Registration
+            builder.Services.AddScoped<IClientService, ClientService>();
+            builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+            builder.Services.AddScoped<IServiceService, ServiceService>();
+            builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+
+
+            // Global Exception Handling Middleware
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
