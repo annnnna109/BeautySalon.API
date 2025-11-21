@@ -18,15 +18,6 @@ namespace BeautySalon.API.Services.Interfaces
         Task<ServiceDTO> GetServiceByIdAsync(int id);
 
         /// <summary>
-        /// Получить услуги по категории
-        /// </summary>
-        Task<IEnumerable<ServiceDTO>> GetServicesByCategoryAsync(string category);
-
-        /// <summary>
-        /// Получить услуги с сотрудниками
-        /// </summary>
-        Task<IEnumerable<ServiceDTO>> GetServicesWithEmployeesAsync();
-        /// <summary>
         /// Создать новую услугу
         /// </summary>
         Task<ServiceDTO> CreateServiceAsync(CreateServiceDTO createServiceDto);
@@ -41,5 +32,14 @@ namespace BeautySalon.API.Services.Interfaces
         /// </summary>
         Task DeleteServiceAsync(int id);
 
+        /// <summary>
+        /// Получить услуги по категории
+        /// </summary>
+        Task<IEnumerable<ServiceDTO>> GetServicesByCategoryAsync(string category);
+
+        /// <summary>
+        /// Получить услуги с сотрудниками
+        /// </summary>
+        Task<IEnumerable<ServiceDTO>> GetServicesWithEmployeesAsync();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BeautySalon.API.DTOs;
+using BeautySalon.API.Models;
 using BeautySalon.API.Repositories.Interfaces;
 using BeautySalon.API.Services.Interfaces;
 
@@ -41,6 +42,40 @@ namespace BeautySalon.API.Services
                 throw new KeyNotFoundException($"Услуга с ID {id} не найдена");
 
             return _mapper.Map<ServiceDTO>(service);
+        }
+
+        /// <summary>
+        /// Создать новую услугу
+        /// </summary>
+        public async Task<ServiceDTO> CreateServiceAsync(CreateServiceDTO createServiceDto)
+        {
+            var service = _mapper.Map<Service>(createServiceDto);
+            await _serviceRepository.AddAsync(service);
+            return _mapper.Map<ServiceDTO>(service);
+        }
+
+        /// <summary>
+        /// Обновить услугу
+        /// </summary>
+        public async Task UpdateServiceAsync(int id, UpdateServiceDTO updateServiceDto)
+        {
+            var existingService = await _serviceRepository.GetByIdAsync(id);
+            if (existingService == null)
+                throw new KeyNotFoundException($"Услуга с ID {id} не найдена");
+
+            _mapper.Map(updateServiceDto, existingService);
+            _serviceRepository.Update(existingService);
+        }
+
+        /// <summary>
+        /// Удалить услугу
+        /// </summary>
+        public async Task DeleteServiceAsync(int id)
+        {
+            if (!await _serviceRepository.ExistsAsync(id))
+                throw new KeyNotFoundException($"Услуга с ID {id} не найдена");
+
+            await _serviceRepository.RemoveByIdAsync(id);
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using BeautySalon.API.DTOs;
 using BeautySalon.API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BeautySalon.API.Controllers
@@ -9,6 +10,7 @@ namespace BeautySalon.API.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AppointmentsController : ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
@@ -50,6 +52,7 @@ namespace BeautySalon.API.Controllers
         /// <param name="createAppointmentDto">Данные для создания записи</param>
         /// <returns>Созданная запись</returns>
         [HttpPost]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult<AppointmentDTO>> PostAppointment(CreateAppointmentDTO createAppointmentDto)
         {
             var appointment = await _appointmentService.CreateAppointmentAsync(createAppointmentDto);

@@ -1,5 +1,6 @@
 ﻿using BeautySalon.API.DTOs;
 using BeautySalon.API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BeautySalon.API.Controllers
@@ -9,6 +10,8 @@ namespace BeautySalon.API.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin,Employee")]
+    [Route("api/[controller]")]
     public class ClientsController : ControllerBase
     {
         private readonly IClientService _clientService;

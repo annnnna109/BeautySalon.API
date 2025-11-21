@@ -7,6 +7,11 @@ using BeautySalon.API.Services;
 using BeautySalon.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using EmployeeManagementService = BeautySalon.API.Services.EmployeeManagementService;
+using ServiceManagementService = BeautySalon.API.Services.ServiceService;
 
 
 
@@ -17,6 +22,7 @@ namespace BeautySalon.API
         public static void Main(string[] args)
         {
 
+            //app.Run();
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -24,37 +30,56 @@ namespace BeautySalon.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            // Configure Entity Framework with PostgreSQL
+            //// Configure Entity Framework with PostgreSQL
             builder.Services.AddDbContext<BeautySalonContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            var app = builder.Build();
-            // Global Exception Handling Middleware
-            app.UseMiddleware<ExceptionHandlingMiddleware>();
+            // JWT Authentication
+            var jwtSettings = builder.Configuration.GetSection("Jwt");
+            var key = Encoding.UTF8.GetBytes(jwtSettings["Secret"]);
 
-            // Seed the database
-            using (var scope = app.Services.CreateScope())
+            builder.Services.AddAuthentication(options =>
             {
-                var services = scope.ServiceProvider;
-                try
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    var context = services.GetRequiredService<BeautySalonContext>();
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidAudience = jwtSettings["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ClockSkew = TimeSpan.Zero
+                };
 
-                    // Применяем миграции автоматически
-                    context.Database.Migrate();
-
-                    // Заполняем тестовыми данными
-                    SeedData.Initialize(services);
-                }
-                catch (Exception ex)
+                options.Events = new JwtBearerEvents
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred seeding the DB.");
-                }
-            }
+                    OnAuthenticationFailed = context =>
+                    {
+                        if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                        {
+                            context.Response.Headers.Add("Token-Expired", "true");
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+            });
 
-            ////// AutoMapper
-            ////builder.Services.AddAutoMapper(typeof(Program));
+            // Authorization
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Admin", "Employee"));
+                options.AddPolicy("ClientOnly", policy => policy.RequireRole("Admin", "Employee", "Client"));
+            });
+
+            // AutoMapper
+            //builder.Services.AddAutoMapper(typeof(Program));
 
             // Repository Registration
             builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
@@ -66,9 +91,11 @@ namespace BeautySalon.API
             // Service Registration
             builder.Services.AddScoped<IClientService, ClientService>();
             builder.Services.AddScoped<IEmployeeManagementService, EmployeeManagementService>();
-            builder.Services.AddScoped<IServiceService, ServiceService>();
+            builder.Services.AddScoped<IServiceService, ServiceManagementService>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
+            var app = builder.Build();
 
             // Global Exception Handling Middleware
             app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -81,10 +108,26 @@ namespace BeautySalon.API
             }
 
             app.UseHttpsRedirection();
+
+            // Authentication & Authorization
+            app.UseAuthentication();
             app.UseAuthorization();
+
             app.MapControllers();
 
             app.Run();
+
+
+            //var app = builder.Build();
+
+            //app.Urls.Add("https://localhost:7000");
+            //app.Urls.Add("http://localhost:5000");
+
+            //Console.WriteLine("Application URLs:");
+            //foreach (var url in app.Urls)
+            //{
+            //    Console.WriteLine($"  {url}");
+            //}
         }
     }
 }

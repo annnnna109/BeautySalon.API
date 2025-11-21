@@ -12,6 +12,7 @@ namespace BeautySalon.API.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<EmployeeService> EmployeeServices { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -84,7 +85,26 @@ namespace BeautySalon.API.Data
             });
 
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasIndex(u => u.Username).IsUnique();
+                entity.HasIndex(u => u.Email).IsUnique();
+
+                entity.Property(u => u.Role)
+                    .HasDefaultValue("Client")
+                    .IsRequired();
+
+                entity.Property(u => u.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                entity.Property(u => u.IsActive)
+                    .HasDefaultValue(true);
+            });
         }
+
+
+
     }
 
 }

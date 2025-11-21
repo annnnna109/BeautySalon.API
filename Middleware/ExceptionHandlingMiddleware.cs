@@ -1,28 +1,20 @@
-﻿using System.Net;
+﻿using Microsoft.IdentityModel.Tokens;
+using System.Net;
 using System.Text.Json;
 
 namespace BeautySalon.API.Middleware
 {
-    /// <summary>
-    /// Глобальный обработчик исключений
-    /// </summary>
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
-        /// <summary>
-        /// Конструктор middleware
-        /// </summary>
         public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;
             _logger = logger;
         }
 
-        /// <summary>
-        /// Обработка запроса
-        /// </summary>
         public async Task InvokeAsync(HttpContext context)
         {
             try
@@ -36,13 +28,9 @@ namespace BeautySalon.API.Middleware
             }
         }
 
-        /// <summary>
-        /// Обработка исключения и формирование ответа
-        /// </summary>
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
             var response = new
             {
@@ -55,36 +43,68 @@ namespace BeautySalon.API.Middleware
                 }
             };
 
-            // Для KeyNotFoundException возвращаем 404
-            if (exception is KeyNotFoundException)
+            // Обработка различных типов исключений
+            switch (exception)
             {
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                response = new
-                {
-                    error = new
+                case UnauthorizedAccessException:
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    response = new
                     {
-                        message = "Ресурс не найден",
-                        details = exception.Message,
-                        type = exception.GetType().Name,
-                        timestamp = DateTime.UtcNow
-                    }
-                };
-            }
+                        error = new
+                        {
+                            message = "Ошибка авторизации",
+                            details = exception.Message,
+                            type = exception.GetType().Name,
+                            timestamp = DateTime.UtcNow
+                        }
+                    };
+                    break;
 
-            // Для ArgumentException возвращаем 400
-            if (exception is ArgumentException)
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response = new
-                {
-                    error = new
+                case SecurityTokenException:
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    response = new
                     {
-                        message = "Неверные параметры запроса",
-                        details = exception.Message,
-                        type = exception.GetType().Name,
-                        timestamp = DateTime.UtcNow
-                    }
-                };
+                        error = new
+                        {
+                            message = "Неверный токен",
+                            details = exception.Message,
+                            type = exception.GetType().Name,
+                            timestamp = DateTime.UtcNow
+                        }
+                    };
+                    break;
+
+                case KeyNotFoundException:
+                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                    response = new
+                    {
+                        error = new
+                        {
+                            message = "Ресурс не найден",
+                            details = exception.Message,
+                            type = exception.GetType().Name,
+                            timestamp = DateTime.UtcNow
+                        }
+                    };
+                    break;
+
+                case ArgumentException:
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response = new
+                    {
+                        error = new
+                        {
+                            message = "Неверные параметры запроса",
+                            details = exception.Message,
+                            type = exception.GetType().Name,
+                            timestamp = DateTime.UtcNow
+                        }
+                    };
+                    break;
+
+                default:
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    break;
             }
 
             var result = JsonSerializer.Serialize(response, new JsonSerializerOptions
